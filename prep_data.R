@@ -22,7 +22,7 @@ rpkm = rpkm[,-1]
 # map ENSG in recount2 to HGNC
 ensembl = useMart("ensembl",dataset="hsapiens_gene_ensembl")
 bm_rv = getBM(
-  attributes = c("ensembl_gene_id_version", "hgnc_symbol")
+  attributes = c("ensembl_gene_id_version", "hgnc_symbol"),
   filters = c("ensembl_gene_id_version"),
   values = row.names(rpkm),
   mart = ensembl
