@@ -32,8 +32,8 @@ bm_rv = getBM(
 rows_df = data.frame(ensembl_gene_id_version = row.names(rpkm))
 rows_merged = merge(x = rows_df, y = bm_rv, all.x = TRUE, by.x = 'ensembl_gene_id_version', by.y = 'ensembl_gene_id_version')
 rows_filtered = rows_merged[rows_merged$hgnc_symbol %in% rows_hgnc,]
-saveRDS(rows_filtered, file.path(args$outdir), 'recount2_row_filter.RDS')
+saveRDS(rows_filtered, file.path(args$outdir, 'recount2_row_filter.RDS'))
 
 # rows are named by ENSG_id
 # filter and save
-saveRDS(rpkm[rows_filtered$ensembl_gene_id_version,], file.path(args$outdir), 'recount2_data_prep_CoGAPS.RDS')
+saveRDS(rpkm[rows_filtered$ensembl_gene_id_version,], file.path(args$outdir, 'recount2_data_prep_CoGAPS.RDS'))
