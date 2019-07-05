@@ -10,7 +10,7 @@ parser$add_argument('--outdir', '-o', required=TRUE)
 args = parser$parse_args()
 
 # load MultiPLIER rows
-plier_data = readRDS(args$infile)
+plier_data = readRDS(args$plier)
 rows_hgnc = row.names(plier_data$rpkm.cm)
 rm(plier_data)
 
