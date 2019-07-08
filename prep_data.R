@@ -4,6 +4,7 @@ library(biomaRt)
 prep_recount_multiplier = function(rpkm_rds) {
   # https://github.com/greenelab/rheum-plier-data/blob/978c37938383ff7adcadacfcbc35931ce5e62b17/recount2/2-prep_recount_for_plier.R
   # normalized recount2 data
+  `%>%` <- dplyr::`%>%`
   rpkm.df <- readRDS(rpkm_rds)
 
   # set seed for reproducibility
