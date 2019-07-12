@@ -16,6 +16,10 @@ y_df_t = y_tidy %>% dplyr::select(id, Symbol, zScore) %>% spread(Symbol, zScore)
 sample_names = levels(y_df_t$id)
 row.names(y_df_t) = sample_names
 
+# TODO how to do this step better? mainly the unique
+sample_meta = unique(y_tidy %>% dplyr::select(id, tumorType))
+write.csv(sample_meta, file.path(args$outdir, 'sample_meta.csv'), row.names=FALSE)
+
 # Z has row names
 z_matrix = read.csv(args$gene_by_latent)
 z_row_names = levels(z_matrix[,1])
