@@ -132,7 +132,7 @@ classes = []
 data = []
 for k,v in intra_tumor_corr_coefs.items():
   classes.append(k)
-  data.append(coefs)
+  data.append(v)
 plt.clf()
 plt.title('Intra-Tumor Feature Correlation')
 plt.boxplot(data)
