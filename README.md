@@ -1,2 +1,2 @@
 # nf-mf
-Tools for matrix factorization methods for NF
+Tools for matrix factorization methods for NF.
