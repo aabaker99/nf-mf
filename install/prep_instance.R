@@ -1,4 +1,9 @@
 #!/usr/bin/env Rscript
+local({
+  r <- getOption("repos")
+  r["CRAN"] <- "http://cran.r-project.org" 
+  options(repos=r)
+})
 install.packages("argparse")
 install.packages("BiocManager")
 install.packages("dplyr")
