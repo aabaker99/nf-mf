@@ -1,0 +1,31 @@
+#!/bin/sh
+# upload folder and its contents to synapse
+
+# check inputs
+syn="$1"
+dir="$2"
+if [ -z "$1" -o -z "$2" ]; then
+  echo "usage: synapse_add_folder <syn> <dir>" >&2
+  exit 1
+fi
+# check access to syn
+if [ "$(synapse show $syn 2>&1 >/dev/null | grep -qF 'SynapseHTTPError' ; echo $?)" = "0" ]; then
+  echo "Cannot create folders under Synapse ID = $1" >&2
+  exit 2
+fi
+# check dir
+if [ ! -d "$2" ]; then
+  echo "$2 is not a directory" >&2
+  exit 3
+fi
+basename_ext="${dir##*/}" # ${parameter##word} remove matching prefix pattern
+basename="${basename_ext%.*}" # ${parameter%word} remove matching suffix pattern
+
+folder_id="$(synapse create -parentid $syn -name $basename Folder | grep -oE 'syn[0-9][0-9]*')"
+if [ -z "$folder_id" ]; then
+  echo "Could not create folder" >&2
+  exit 4
+fi
+for fname in "$dir"/*; do 
+  synapse add -parentid $folder_id $fname
+done
