@@ -3,6 +3,10 @@ library(tidyr)
 
 parser = ArgumentParser(description="Apply MultiPLIER-style transfer learning")
 parser$add_argument('--gene-by-sample-tidy', '-y', help='Data for Y in the form of a tidy dataset', required=TRUE)
+parser$add_argument('--tidy-row', '-r', required=TRUE, help="Tidy variable to use as rows in matrix")
+parser$add_argument('--tidy-col', '-c', required=TRUE, help="Tidy variable to use as columns in matrix")
+parser$add_argument('--tidy-val', '-v', required=TRUE, help="Tidy variable to use as values in matrix")
+parser$add_argument('--tidy-meta', '-m', required=TRUE, help="Meta data for each row/sample e.g. tumorType")
 parser$add_argument('--gene-by-latent', '-z', help='A learned gene-by-latent matrix from a prior run of a matrix factorization method e.g. PRMF, CoGAPS, PLIER, etc.', required=TRUE)
 parser$add_argument('--outdir', '-o', help='Directory to write results to', required=TRUE)
 args = parser$parse_args()
@@ -11,13 +15,19 @@ args = parser$parse_args()
 # Y is gene x sample
 # Z is gene x latent
 # B is latent x sample
-y_tidy = read.csv(args$gene_by_sample_tidy)
-y_df_t = y_tidy %>% dplyr::select(id, Symbol, zScore) %>% spread(Symbol, zScore)
-sample_names = levels(y_df_t$id)
-row.names(y_df_t) = sample_names
+y_tidy = read.csv(args$gene_by_sample_tidy, sep='\t')
+y_df_t = y_tidy %>% 
+  dplyr::group_by(!!as.name(args$tidy_row), !!as.name(args$tidy_col)) %>% 
+  dplyr::summarise(mean = mean(!!as.name(args$tidy_val))) %>% 
+  spread(!!as.name(args$tidy_col), mean)
 
-# TODO how to do this step better? mainly the unique
-sample_meta = unique(y_tidy %>% dplyr::select(id, tumorType))
+# write sample metadata
+sample_meta = y_tidy %>% 
+  dplyr::select(!!as.name(args$tidy_row), !!as.name(args$tidy_meta)) %>% 
+  dplyr::group_by(!!as.name(args$tidy_row)) %>% 
+  dplyr::summarise(first = dplyr::first(!!as.name(args$tidy_meta))) %>% 
+  dplyr::mutate(!!as.name(args$tidy_meta) := first) %>%
+  dplyr::select(!!as.name(args$tidy_row), !!as.name(args$tidy_meta))
 write.csv(sample_meta, file.path(args$outdir, 'sample_meta.csv'), row.names=FALSE)
 
 # Z has row names
