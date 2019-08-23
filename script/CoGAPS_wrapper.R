@@ -12,28 +12,6 @@ main = function() {
   parser$add_argument('-s', '--n-sets', required=TRUE, type='integer', help="Number of sets to distribute over")
   args = parser$parse_args()
 
-  # Load data
-  # TODO this section is ignore while I test the distributed version of CoGAPS
-  # which prefers to use a file instead of loading the data
-#  write('[STATUS] Loading data...', stdout())
-#  data = NULL
-#  if (args$data_type == 'csv') {
-#    data = as.matrix(read.csv(args$data, row.names=1))
-#  } else if (args$data_type == 'RDS') {
-#    data = readRDS(args$data)
-#  } else {
-#    write(sprintf('Unrecognized --data-type = %s', args$data_type), stderr())
-#    quit('save'='no', status=2)
-#  }
-#  dim_rv = dim(data)
-#  write(sprintf('[STATUS] Done loading data with shape = (%d, %d)', dim_rv[1], dim_rv[2]), stdout())
-#
-#  # Check for non-numeric row names in the first column
-#  if (class(data[2,1]) == 'character') {
-#    row.names(data) = data[,1]
-#    data = data[,2:dim_rv[2]]
-#  }
-
   # Prepare CoGAPS parameters
   params = new("CogapsParams")
   params = setParam(params, "nPatterns", args$k_latent)
