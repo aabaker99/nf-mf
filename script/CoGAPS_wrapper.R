@@ -8,7 +8,6 @@ main = function() {
   parser$add_argument('-k', '--k-latent', required=FALSE, type='integer', default=7, help="CoGAPS nPatterns parameter")
   parser$add_argument('-o', '--outdir', required=TRUE, help="Location to write results")
   parser$add_argument('-t', '--transpose-data', required=FALSE, action='store_true', default=FALSE, help="Provide this flag if the data file is n_features x n_samples")
-  parser$add_argument('-y', '--data-type', required=FALSE, default='csv', help="Provide --data-type RDS if <--data> is an RDS file rather than a CSV")
   parser$add_argument('-s', '--n-sets', required=TRUE, type='integer', help="Number of sets to distribute over")
   args = parser$parse_args()
 
