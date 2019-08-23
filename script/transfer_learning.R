@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 library(argparse)
 library(tidyr)
 
@@ -20,6 +21,7 @@ y_df_t = y_tidy %>%
   dplyr::group_by(!!as.name(args$tidy_row), !!as.name(args$tidy_col)) %>% 
   dplyr::summarise(mean = mean(!!as.name(args$tidy_val))) %>% 
   spread(!!as.name(args$tidy_col), mean)
+sample_names = levels(y_df_t[[args$tidy_row]])
 
 # write sample metadata
 sample_meta = y_tidy %>% 
@@ -31,17 +33,54 @@ sample_meta = y_tidy %>%
 write.csv(sample_meta, file.path(args$outdir, 'sample_meta.csv'), row.names=FALSE)
 
 # Z has row names for the genes
-z_matrix = read.csv(args$gene_by_latent)
-z_row_names = levels(z_matrix[,1])
-z_matrix = data.matrix(z_matrix[,-1])
-row.names(z_matrix) = z_row_names
+z_matrix = read.csv(args$gene_by_latent, row.names=1)
+z_row_names = row.names(z_matrix)
+z_matrix = data.matrix(z_matrix)
+
+# Z may be defined on ENSG or HGNC
+# map ENSG to HGNC if needed
+# map identifiers using HGNC custom download
+if (substr(row.names(z_matrix)[1], 1, 4) == "ENSG") {
+  url = 'https://www.genenames.org/cgi-bin/download/custom?col=gd_hgnc_id&col=gd_app_sym&col=gd_app_name&col=gd_status&col=gd_prev_sym&col=gd_aliases&col=gd_pub_chrom_map&col=gd_pub_acc_ids&col=gd_pub_refseq_ids&col=gd_pub_ensembl_id&status=Approved&status=Entry%20Withdrawn&hgnc_dbtag=on&order_by=gd_app_sym_sort&format=text&submit=submit'
+  ensg_hgnc_map_fp = file.path(args$outdir, 'ensg_hgnc_map.tsv')
+  if (!file.exists(ensg_hgnc_map_fp)) {
+    download.file(url, ensg_hgnc_map_fp)
+  }
+  ensg_hgnc_df = read.csv(ensg_hgnc_map_fp, sep='\t')
+  ensg_hgnc_map = new.env()
+  build_map = function(x) {
+    if (x[['Ensembl.gene.ID']] != "") {
+      ensg_hgnc_map[[x[['Ensembl.gene.ID']]]] = x[['Approved.symbol']]
+    }
+  }
+  apply_rv = apply(ensg_hgnc_df, 1, build_map)
+  new_row_names = sapply(z_row_names, function(ensg) {
+    rv = ensg
+    hgnc = ensg_hgnc_map[[ensg]]
+    if(!is.null(hgnc)) {
+      rv = hgnc
+    }
+    return(rv)
+  })
+  new_row_names = as.vector(new_row_names)
+  row.names(z_matrix) = new_row_names
+}
+
+# Report initial numbers of genes before intersection
+y_matrix = t(data.matrix(y_df_t))
+write(paste0("Number of genes in input sample x gene matrix Y: ", dim(y_matrix)[1]), stderr())
+write(paste0("Number of genes in input gene x latent matrix Z: ", dim(z_matrix)[1]), stderr())
 
 # Only select genes that the transfer learning model was trained on
 common_genes = intersect(row.names(z_matrix), colnames(y_df_t))
-y_df_t_select = y_df_t %>% dplyr::select(common_genes)
-y_matrix = t(data.matrix(y_df_t_select))
-y_matrix[is.na(y_matrix)] = 0
-
+write(paste0("Number of genes common to input datasets after mapping: ", length(common_genes)), stderr())
+if (length(common_genes) == 0) {
+  print("No common genes, quitting")
+  quit(status=1)
+}
+y_matrix = y_matrix[common_genes,]
+z_matrix = z_matrix[common_genes,]
+  
 # L2 defaults to smallest singular value in SVD according to PLIER.
 # it's probably the case that this parameter does not affect differential expression analysis using B.
 # however, this is a poor default (especially in low sample settings): the smallest singular 
