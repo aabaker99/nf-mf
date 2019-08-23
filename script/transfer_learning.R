@@ -30,7 +30,7 @@ sample_meta = y_tidy %>%
   dplyr::select(!!as.name(args$tidy_row), !!as.name(args$tidy_meta))
 write.csv(sample_meta, file.path(args$outdir, 'sample_meta.csv'), row.names=FALSE)
 
-# Z has row names
+# Z has row names for the genes
 z_matrix = read.csv(args$gene_by_latent)
 z_row_names = levels(z_matrix[,1])
 z_matrix = data.matrix(z_matrix[,-1])
