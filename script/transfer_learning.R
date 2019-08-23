@@ -68,6 +68,7 @@ if (substr(row.names(z_matrix)[1], 1, 4) == "ENSG") {
 
 # Report initial numbers of genes before intersection
 y_matrix = t(data.matrix(y_df_t))
+y_matrix[is.na(y_matrix)] = 0
 write(paste0("Number of genes in input sample x gene matrix Y: ", dim(y_matrix)[1]), stderr())
 write(paste0("Number of genes in input gene x latent matrix Z: ", dim(z_matrix)[1]), stderr())
 
