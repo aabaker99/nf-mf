@@ -10,6 +10,7 @@ parser$add_argument("--outdir", "-o", required=TRUE)
 args = parser$parse_args()
 
 # NF acronyms
+# TODO what if some other tumorType is present in --sample-meta
 abbrev_df = data.frame(
   tumorType=c("Cutaneous Neurofibroma", "High Grade Glioma", "Low Grade Glioma", "Malignant Peripheral Nerve Sheath Tumor", "Meningioma", "Neurofibroma", "Plexiform Neurofibroma", "Schwannoma", ""),
   tumorTypeAbbrev=c('cNF', 'HGG', 'LGG', 'MPNST', 'MG', 'NF', 'pNF', 'SW', "")
@@ -32,7 +33,7 @@ sample_meta = read.csv(args$sample_meta)
 tumor_count_df = sample_meta %>%
   group_by(tumorType) %>%
   summarise(count=dplyr::n())
-print(tumor_count_df)
+abbrev_and_count_df = merge(x=abbrev_df, y=tumor_count_df, by='tumorType')
 
 # Conduct KS-test for each pair of tumor types for each LV
 tumor_types = levels(sample_meta$tumorType)
@@ -70,12 +71,15 @@ for (i in 1:dim(ks_summary_group_tumor)[1]) {
     p_value_str = sprintf('KS-test p = %1.3e', ks_summary_group_tumor[i,'pValue'])
   }
 
+  tumor_type_data = abbrev_and_count_df[abbrev_and_count_df$tumorType == tumor_type,]
+  tumor_type_abbrev = tumor_type_data$tumorTypeAbbrev
+
   val_x = b_matrix[sample_meta$tumorType == tumor_type, k_label]
-  label_x = paste0(tumor_type, sprintf('\nN = %d', length(val_x)))
+  label_x = paste0(tumor_type_abbrev, sprintf('\nN = %d', length(val_x)))
   label_x_r = replicate(length(val_x), label_x)
 
   val_y = b_matrix[sample_meta$tumorType != tumor_type, k_label]
-  label_y = paste0('not ', tumor_type, sprintf('\nN = %d', length(val_y)))
+  label_y = paste0('not ', tumor_type_abbrev, sprintf('\nN = %d', length(val_y)))
   label_y_r = replicate(length(val_y), label_y)
 
   plot_df = data.frame(val=c(val_x, val_y), label=c(label_x_r, label_y_r))
