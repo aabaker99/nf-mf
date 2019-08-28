@@ -30,5 +30,8 @@ A script to follow the Multi-PLIER model of transfer learning.
 The Multi-PLIER model is roughly `Y = Z B` where `Y` is a gene x sample measurement matrix from the rare disease of interest, `Z` is a learned gene x latent representation from another dataset (recount2 in this case), and `B` is the matrix to compute.
 This corresponds to left-multiplying both sides by the pseudoinverse of `Z`.
 
+## scripts/kolmogorov_smirinov.R
+A script to identify which latent variables can distinguish samples of different disease states.
+
 ## recount2 data
 https://ndownloader.figshare.com/files/10881866
