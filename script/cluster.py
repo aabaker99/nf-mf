@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn import preprocessing
@@ -25,21 +26,29 @@ class_labels_map = {
 parser = argparse.ArgumentParser(description="""
 Cluster and visualize a data matrix given by --sample-by-latent
 """)
-parser.add_argument("--sample-by-latent", "-s", required=True)
-parser.add_argument("--meta", "-m", required=True)
+parser.add_argument("--data", "-d", required=True, help='sample x feature data matrix')
+parser.add_argument("--meta", "-m", required=True, help='sample x meta annotation matrix (rows in <meta> correspond to rows in <data>)')
 parser.add_argument("--outdir", "-o", required=True)
+parser.add_argument("--remove-columns", "-r", required=False, nargs="+", help="Columns to remove, given by column name")
 args = parser.parse_args()
 
-sample_by_latent_df = pd.read_csv(args.sample_by_latent, index_col=0)
+data_df = pd.read_csv(args.data, index_col=0)
+col_data = []
+if args.remove_columns is not None:
+  for remove_column in args.remove_columns:
+    col_data.append(data_df.pop(remove_column))
 
 # encode tumor type as an integer
 le = preprocessing.LabelEncoder()
 meta_df = pd.read_csv(args.meta, index_col=0)
 le.fit(list(meta_df.iloc[:,0]))
-y_raw = list(map(lambda x: str(x), list(sample_by_latent_df.join(meta_df).loc[:,'tumorType']))) 
+y_raw = list(map(lambda x: str(x), list(data_df.join(meta_df).loc[:,'tumorType']))) 
 y = le.transform(y_raw)
 
-X = np.array(sample_by_latent_df)
+X = np.array(data_df)
+# NOTE convert NaN to 0
+
+
 pca = PCA()
 pca.fit(X)
 X_new = pca.transform(X)
@@ -66,7 +75,7 @@ plt.tight_layout()
 plt.savefig(os.path.join(args.outdir, 'scatter.png'))
 
 # TODO or hierarchical clustering?
-#kmeans = KMeans(n_clusters=6).fit(sample_by_latent_df)
+#kmeans = KMeans(n_clusters=6).fit(data_df)
 
 # Interpret data matrix as a soft clustering, assign each sample to the latent cluster with
 # the highest loading
@@ -162,3 +171,6 @@ plt.xlabel('Tumor Type Pairs')
 plt.ylabel('Pearson Correlation Coefficient')
 plt.tight_layout()
 plt.savefig(os.path.join(args.outdir, 'inter_tumor_corrlation.png'))
+
+# hierarchical clustering
+#import seaborn as sns
