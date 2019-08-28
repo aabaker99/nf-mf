@@ -33,5 +33,14 @@ This corresponds to left-multiplying both sides by the pseudoinverse of `Z`.
 ## scripts/kolmogorov_smirinov.R
 A script to identify which latent variables can distinguish samples of different disease states.
 
+## scripts/cluster.py
+A visualization tool for transferred features. Generates PCA plot, computes Adjusted Rand Index to measure agreement of maximum loading (as a clustering procedure) with the clustering reported by sample tumor types, and plots latent variable correlations within and across tumor types.
+
+## scripts/limma.R
+Alternative to kolmogorov_smirinov.R to measure "differentially expressed" latent variables. Initial tests reported all latent variables as differentially expressed.
+
 ## recount2 data
 https://ndownloader.figshare.com/files/10881866
+
+## TODO
+- Refine design matrix in limma.R to increase cutoff for differential expression and focus on a smaller set of LVs
