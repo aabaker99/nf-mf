@@ -1,6 +1,15 @@
 # nf-mf
 Tools for matrix factorization methods for NF.
 
+Files in this repository are associated with applying matrix factorization (MF) methods to a large cancer dataset, recount2.
+The methods are thought to learn a useful model or latent representation of the data.
+In particular, MF identifies gene signatures/latent vectors, in an unsupervised manner, that characterize differences among the cancer samples.
+The MF model is then applied/transferred to another setting: the analysis of Neurofibromatosis (NF).
+For each sample, the model provides a loading/score for each latent vector.
+The latent variable loadings may be used to differentiate samples of different NF disease status.
+We may then inspect the latent variables in the model to understand which genes or groups of genes are responsible for the differentiation.
+In doing so, we gain insights into the biology driving the NF disease and its progression.
+
 ## scripts/CoGAPS_wrapper.R
 This is a command-line interface I wrote to run CoGAPS.
 In addition to the shared matrix dimension parameter, `--k-latent`, there is a parameter called `--n-sets` which is important for the distributed version of CoGAPS.
